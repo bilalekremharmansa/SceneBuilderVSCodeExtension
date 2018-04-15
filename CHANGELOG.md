@@ -1,11 +1,17 @@
 # Change Log
 All notable changes to the "scenebuilderextension" extension will be documented in this file.
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+I'm not a JS developer. I am not familiar with Promise and callbacks. I am open to any kind of feedback.
 
 ## [Unreleased]
-- `Open in SceneBuilder` should be called from explorer menu and context menu.
-- `scenebuilder.home` is setting manually by hand. User should be select it via file dialog.
+- Tests are required.
+
+### [0.0.2] - 15 April 2018
+-`Open in SceneBuilder` command can be invoked from either context menu or explorer menu.
+-SceneBuilderExtension needs application path for open FXML files with it. Application path is searching in following steps:
+    *`scenebuilder.home` should be set in global settings in VSCode.
+    *Extension asks user for where application path is located. After user make a selection. Configuration file saves into extension
+    storage path. For next usage, extension will read this path information to open it.
 
 ## [0.0.1] - 11 April 2018
 

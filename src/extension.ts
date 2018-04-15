@@ -3,49 +3,125 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import * as cp from 'child_process';
+import * as fs from 'fs';
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
+
+const CONFIG_PATH:string = '/settings.json';
+var STORAGE_PATH:string|undefined;
+
 export function activate(context: vscode.ExtensionContext) {
 
+    STORAGE_PATH = context.storagePath;
     console.log('SceneBuilder Extension is now active!');
 
-    let disposable = vscode.commands.registerCommand('extension.scenebuilder', () => {
+    let disposable = vscode.commands.registerCommand('extension.scenebuilder', (event) => {
 
-        /** SceneBuilder application path */
-        let sceneBuilderPath = getSceneBuilderPath();
-        console.log("scenebuilder path -" + sceneBuilderPath);
-
-        let fxmlPath:string|undefined;
+        let fxmlPath:string;
         let editor = vscode.window.activeTextEditor;
-        if(editor) {
+        if(event) {
+            fxmlPath = event.path;
+        } else if(editor) {
             /** path that will be opened in SceneBuilder */
             fxmlPath = editor.document.fileName;
             console.log("fxml file path -" + fxmlPath);
+        } else {
+            // exception ?
+            console.log("no file -- exception");
+            return;
         }
-
-        /** if sceneBuilderPath and file path is okey. There is no validation for now.*/
-        if(fxmlPath && sceneBuilderPath) {
+        
+        /** SceneBuilder application path */
+        let config = vscode.workspace.getConfiguration();
+        let sceneBuilderPath:string|undefined = config.get('scenebuilder.home');
+        /** if user configurated SceneBuilder path with scenebuilder.home key into global settings,
+         * simply return it. 
+         */
+        if(sceneBuilderPath) {
             cp.execFile(sceneBuilderPath, [fxmlPath], {}, (error, stdout, stderr) => {
-                if (error || stderr) {
+                if (error) {
                      console.log('exec error: ' + error);
                      vscode.window.showErrorMessage("SceneBuilder couldn't opened!");
                 }
             });
-            vscode.window.showInformationMessage('SceneBuilder is opening..!');
         } else {
-            vscode.window.showErrorMessage("SceneBuilder configuration could not found!");
+            try {
+                /** Trying to read SceneBuilder path from config file. User do not set this config
+                 * manually. If SceneBuilderExtension can not find the config file, it will generate
+                 * by itself and expects to determine SceneBuilder path from user.
+                 */
+                let buffer:Buffer = fs.readFileSync(STORAGE_PATH + CONFIG_PATH, null);
+                sceneBuilderPath = buffer.toString();
+                cp.execFile(sceneBuilderPath, [fxmlPath], {}, (error, stdout, stderr) => {
+                    if (error) {
+                         console.log('exec error: ' + error);
+                         vscode.window.showErrorMessage("SceneBuilder couldn't opened!");
+                    }
+                });
+            }catch(error) {
+                /** As extension needs a config file, if there path is not exist we should
+                 * create a new one.
+                 */
+                if(error.code === 'ENOENT') {
+                    /** there is itchy here. As I'm not a Javascript developer. I couldn't
+                     * resolved the following problem: 
+                     * showOpenDialog() is aync. However
+                     */
+                    if(STORAGE_PATH) {
+                        let exists:boolean = fs.existsSync(STORAGE_PATH);
+                        if(!exists) {
+                            fs.mkdirSync(STORAGE_PATH);
+                        }
+                        exists = fs.existsSync(CONFIG_PATH);
+                        if(!exists) { 
+                            fs.closeSync(fs.openSync(STORAGE_PATH + CONFIG_PATH, 'w'));
+                        }
+                    }
+                    
+                    createConfigurationFile(fxmlPath, (sceneBuilderPath:string, fxmlPath:string) => {
+                        cp.execFile(sceneBuilderPath, [fxmlPath], {}, (error, stdout, stderr) => {
+                            if (error) {
+                                 console.log('exec error: ' + error);
+                                 vscode.window.showErrorMessage("SceneBuilder couldn't opened!");
+                            }
+                        });
+                    });
+                }
+        
+            }
         }
+        
+        console.log("scenebuilder path -" + sceneBuilderPath);
         
     });
 
     context.subscriptions.push(disposable);
 }
 
-function getSceneBuilderPath():string|undefined {
-    let config = vscode.workspace.getConfiguration();
-    let path:string|undefined = config.get('scenebuilder.home');
-    return path;
+function createConfigurationFile(fxmlPath:string, callback: (sceneBuilderPath:string, fxmlPath:string) => void) {
+    /** stackoverflow.com/a/47063669/5929406 */
+    const options: vscode.OpenDialogOptions = {
+        canSelectMany: false,
+        openLabel: 'Open',
+        filters: {
+            'All files': ['*']
+        }
+    };
+    
+    vscode.window.showOpenDialog(options).then(fileUri => {
+        if (fileUri && fileUri[0]) {
+            let scenebuilderPath = fileUri[0].fsPath;
+            console.log('Selected file: ' + scenebuilderPath);
+
+            fs.writeFile(STORAGE_PATH + CONFIG_PATH, scenebuilderPath, (err) => {
+                if (err) {
+                    return console.error(err);
+                }
+                console.log("Settings are created!");
+            });
+
+            callback(scenebuilderPath, fxmlPath);
+        }
+    });
 }
 
 // this method is called when your extension is deactivated

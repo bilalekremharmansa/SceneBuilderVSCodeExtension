@@ -2,8 +2,9 @@
     "name": "scenebuilderextension",
     "displayName": "SceneBuilder extension for Visual Studio Code",
     "description": "Open FXML files into SceneBuilder from VSCode",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "publisher": "bilalekrem",
+    "repository": "https://github.com/bilalekremharmansa/SceneBuilderVSCodeExtension",
     "engines": {
         "vscode": "^1.22.0"
     },
@@ -23,6 +24,14 @@
         ],
         "menus": {
             "commandPalette": [{
+                "command": "extension.scenebuilder",
+                "when" : "resourceExtname == .fxml"
+            }],
+            "explorer/context": [{
+                "command": "extension.scenebuilder",
+                "when" : "resourceExtname == .fxml"
+            }],
+            "editor/context": [{
                 "command": "extension.scenebuilder",
                 "when" : "resourceExtname == .fxml"
             }]
