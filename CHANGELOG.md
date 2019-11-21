@@ -6,6 +6,9 @@ I'm not a JS developer. I am not familiar with Promise and callbacks. I am open 
 ## [Unreleased]
 - Tests are required.
 
+### [0.0.3] - 21 November 2019
+- Change path of settings.json to store scenebuilder executable path.
+
 ### [0.0.2] - 15 April 2018
 -`Open in SceneBuilder` command can be invoked from either context menu or explorer menu.
 -SceneBuilderExtension needs application path for open FXML files with it. Application path is searching in following steps:
