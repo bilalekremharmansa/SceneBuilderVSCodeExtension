@@ -6,12 +6,10 @@ import * as cp from 'child_process';
 import * as fs from 'fs';
 
 
-const CONFIG_PATH:string = '/settings.json';
-var STORAGE_PATH:string|undefined;
+const CONFIG_PATH:string = 'settings.json';
 
 export function activate(context: vscode.ExtensionContext) {
 
-    STORAGE_PATH = context.storagePath;
     console.log('SceneBuilder Extension is now active!');
 
     let disposable = vscode.commands.registerCommand('extension.scenebuilder', (event) => {
@@ -37,6 +35,7 @@ export function activate(context: vscode.ExtensionContext) {
          * simply return it. 
          */
         if(sceneBuilderPath) {
+            console.log('Executing scenebuilder in ' + sceneBuilderPath);
             cp.execFile(sceneBuilderPath, [fxmlPath], {}, (error, stdout, stderr) => {
                 if (error) {
                      console.log('exec error: ' + error);
@@ -49,7 +48,7 @@ export function activate(context: vscode.ExtensionContext) {
                  * manually. If SceneBuilderExtension can not find the config file, it will generate
                  * by itself and expects to determine SceneBuilder path from user.
                  */
-                let buffer:Buffer = fs.readFileSync(STORAGE_PATH + CONFIG_PATH, null);
+                let buffer:Buffer = fs.readFileSync(CONFIG_PATH, null);
                 sceneBuilderPath = buffer.toString();
                 cp.execFile(sceneBuilderPath, [fxmlPath], {}, (error, stdout, stderr) => {
                     if (error) {
@@ -66,14 +65,10 @@ export function activate(context: vscode.ExtensionContext) {
                      * resolved the following problem: 
                      * showOpenDialog() is aync. However
                      */
-                    if(STORAGE_PATH) {
-                        let exists:boolean = fs.existsSync(STORAGE_PATH);
-                        if(!exists) {
-                            fs.mkdirSync(STORAGE_PATH);
-                        }
-                        exists = fs.existsSync(CONFIG_PATH);
+                    if(CONFIG_PATH) {
+                        let exists = fs.existsSync(CONFIG_PATH);
                         if(!exists) { 
-                            fs.closeSync(fs.openSync(STORAGE_PATH + CONFIG_PATH, 'w'));
+                            fs.closeSync(fs.openSync(CONFIG_PATH, 'w'));
                         }
                     }
                     
@@ -112,7 +107,7 @@ function createConfigurationFile(fxmlPath:string, callback: (sceneBuilderPath:st
             let scenebuilderPath = fileUri[0].fsPath;
             console.log('Selected file: ' + scenebuilderPath);
 
-            fs.writeFile(STORAGE_PATH + CONFIG_PATH, scenebuilderPath, (err) => {
+            fs.writeFile(CONFIG_PATH, scenebuilderPath, (err) => {
                 if (err) {
                     return console.error(err);
                 }
