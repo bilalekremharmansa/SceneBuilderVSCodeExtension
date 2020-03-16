@@ -1,10 +1,14 @@
 # Change Log
 All notable changes to the "scenebuilderextension" extension will be documented in this file.
 
-I'm not a JS developer. I am not familiar with Promise and callbacks. I am open to any kind of feedback.
-
 ## [Unreleased]
 - Tests are required.
+
+### [1.0.0] - 17 March 2020
+- Configure executable scene builder path
+- Use `context.globalState` instead of file storing configurations
+- Open SceneBuilder all platforms as well as macOS (not tested on Windows)
+- Upgrade dependencies
 
 ### [0.0.3] - 21 November 2019
 - Change path of settings.json to store scenebuilder executable path.
