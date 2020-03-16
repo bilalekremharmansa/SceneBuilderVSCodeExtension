@@ -29,13 +29,12 @@ function openInSceneBuilder(event: any, context: vscode.ExtensionContext) {
     } else if(editor) {
         /** path that will be opened in SceneBuilder */
         fxmlPath = editor.document.fileName;
-        console.log("fxml file path -" + fxmlPath);
     } else {
-        // exception ?
-        console.log("no file -- exception");
+        vscode.window.showErrorMessage("FXML path could not be determined");
         return;
     }
     
+    console.log(`FXML file path ${fxmlPath}`);
     // if scene buidler already defined, try to exec
     if(isSceneBuilderPathDefined(context)) {
         execSceneBuilder(context, fxmlPath);
@@ -48,24 +47,34 @@ function openInSceneBuilder(event: any, context: vscode.ExtensionContext) {
 }
 
 function isSceneBuilderPathDefined(context: vscode.ExtensionContext): boolean {
-    return getSceneBuilderPath(context) === undefined;
+    return getSceneBuilderPath(context) !== undefined;
 }
 
 function getSceneBuilderPath(context: vscode.ExtensionContext): string {
     return context
         .globalState
-        .get('SCENE_BUILDER_KEY') as string;
+        .get(SCENE_BUILDER_KEY) as string;
 }
 
 function execSceneBuilder(context: vscode.ExtensionContext, fxmlFilePath: string) {
     let sceneBuilderPath = getSceneBuilderPath(context);
 
-    console.log('executing file: ' + fxmlFilePath + ', with scenebuilder at ' + sceneBuilderPath);
-    cp.execFile(sceneBuilderPath, [fxmlFilePath], {}, (error, stdout, stderr) => {
+    let command: string;
+    let args: string[];
+    // for macOS applications
+    if (process.platform == 'darwin' && sceneBuilderPath.startsWith('/Applications/')) {
+        command = `/usr/bin/open`
+        args = ['-a', sceneBuilderPath, '--args', fxmlFilePath]
+    } else {
+        command = sceneBuilderPath
+        args = [fxmlFilePath]
+    }
 
+    console.log(`executing command: ${command} ${args.join(' ')}`);
+    cp.execFile(command, args, {}, (error, stdout, stderr) => {
         if (error) {
-             console.log('exec error: ' + error);
-             vscode.window.showErrorMessage("SceneBuilder couldn't opened!");
+            console.error('exec error: ' + error);
+            vscode.window.showErrorMessage("SceneBuilder couldn't opened!");
         }
     });
 }
@@ -90,9 +99,10 @@ function updateSceneBuilderPath(context: vscode.ExtensionContext, callback: (sce
 
                 context
                     .globalState
-                    .update(SCENE_BUILDER_KEY, scenebuilderPath);
-
-                callback(scenebuilderPath);
+                    .update(SCENE_BUILDER_KEY, scenebuilderPath)
+                    .then(value => {
+                        callback(scenebuilderPath);
+                    });
             }
         });
 }
