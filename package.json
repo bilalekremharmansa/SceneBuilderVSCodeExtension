@@ -2,52 +2,42 @@
     "name": "scenebuilderextension",
     "displayName": "SceneBuilder extension for Visual Studio Code",
     "description": "Open FXML files into SceneBuilder from VSCode",
-    "version": "0.0.3",
+    "version": "1.0.0",
     "publisher": "bilalekrem",
     "repository": "https://github.com/bilalekremharmansa/SceneBuilderVSCodeExtension",
     "engines": {
-        "vscode": "^1.22.0"
+        "vscode": "^1.43.0"
     },
     "categories": [
         "Other"
     ],
     "activationEvents": [
-        "onCommand:extension.scenebuilder",
-        "onCommand:extension.scenebuilder.changePath"
+        "onCommand:extension.scenebuilder.open-in",
+        "onCommand:extension.scenebuilder.change-path"
     ],
     "main": "./out/extension",
     "contributes": {   
-        "configuration": {
-            "title": "SceneBuilder for VSCode",
-            "properties": {
-                "sceneBuilder.path": {
-                    "type": "string",
-                    "scope": "application",
-                    "description": "Executable SceneBuilder path"
-                }
-            }
-        },
         "commands": [
             {
-                "command": "extension.scenebuilder",
+                "command": "extension.scenebuilder.open-in",
                 "title": "Open in Scene Builder"
             },
             {
-                "command": "extension.scenebuilder.changePath",
-                "title": "Change SceneBuilder path"
+                "command": "extension.scenebuilder.change-path",
+                "title": "Configure Scene Builder path"
             }
         ],
         "menus": {
             "commandPalette": [{
-                "command": "extension.scenebuilder",
+                "command": "extension.scenebuilder.open-in",
                 "when" : "resourceExtname == .fxml"
             }],
             "explorer/context": [{
-                "command": "extension.scenebuilder",
+                "command": "extension.scenebuilder.open-in",
                 "when" : "resourceExtname == .fxml"
             }],
             "editor/context": [{
-                "command": "extension.scenebuilder",
+                "command": "extension.scenebuilder.open-in",
                 "when" : "resourceExtname == .fxml"
             }]
         }
@@ -60,10 +50,10 @@
         "test": "npm run compile && node ./node_modules/vscode/bin/test"
     },
     "devDependencies": {
-        "typescript": "^2.6.1",
-        "vscode": "^1.1.6",
-        "tslint": "^5.8.0",
-        "@types/node": "^7.0.43",
+        "typescript": "^3.8.3",
+        "vscode": "^1.1.36",
+        "tslint": "^6.1.0",
+        "@types/node": "^13.9.1",
         "@types/mocha": "^2.2.42"
     }
 }
