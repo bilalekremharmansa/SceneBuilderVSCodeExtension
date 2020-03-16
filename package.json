@@ -12,14 +12,29 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:extension.scenebuilder"
+        "onCommand:extension.scenebuilder",
+        "onCommand:extension.scenebuilder.changePath"
     ],
     "main": "./out/extension",
     "contributes": {   
+        "configuration": {
+            "title": "SceneBuilder for VSCode",
+            "properties": {
+                "sceneBuilder.path": {
+                    "type": "string",
+                    "scope": "application",
+                    "description": "Executable SceneBuilder path"
+                }
+            }
+        },
         "commands": [
             {
                 "command": "extension.scenebuilder",
                 "title": "Open in Scene Builder"
+            },
+            {
+                "command": "extension.scenebuilder.changePath",
+                "title": "Change SceneBuilder path"
             }
         ],
         "menus": {
