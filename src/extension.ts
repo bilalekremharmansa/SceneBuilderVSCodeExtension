@@ -74,7 +74,7 @@ function execSceneBuilder(context: vscode.ExtensionContext, fxmlFilePath: string
     cp.execFile(command, args, {}, (error, stdout, stderr) => {
         if (error) {
             console.error('exec error: ' + error);
-            vscode.window.showErrorMessage("SceneBuilder couldn't opened!");
+            vscode.window.showErrorMessage("SceneBuilder couldn't be opened!");
         }
     });
 }
