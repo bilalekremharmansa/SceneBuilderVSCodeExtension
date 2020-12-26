@@ -4,6 +4,9 @@ All notable changes to the "scenebuilderextension" extension will be documented 
 ## [Unreleased]
 - Tests are required.
 
+### [1.0.1] - 27 December 2020
+- small correction on error message: "SceneBuilder couldn't be opened!" (@fonsecapaulo)
+
 ### [1.0.0] - 17 March 2020
 - Configure executable scene builder path
 - Use `context.globalState` instead of file storing configurations
